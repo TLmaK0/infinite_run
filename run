@@ -1,0 +1,19 @@
+#!/bin/bash
+while true    
+do
+  ATIME=`stat -c %Z $1`
+
+  if [[ "$ATIME" != "$LTIME" ]]
+  then    
+    if [ ! -z "$PID" ]; then
+      if kill -0 $PID &> /dev/null 2>&1 && ! kill -9 $PID > /dev/null 2>&1; then
+        echo "Could not send SIGTERM to process $PID" >&2
+      fi
+    fi
+    echo 'Reloading...'
+    ./$1 &
+    PID=$!
+    LTIME=$ATIME
+  fi
+  sleep 1
+done
